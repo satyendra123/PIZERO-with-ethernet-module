@@ -17,7 +17,7 @@ Interface Options → SPI → Yes (enable)
 sudo reboot
 
 step-3
-Enable ENC28J60 in config.txt
+Enable ENC28J60 in /boot/config.txt 
 dtoverlay=enc28j60
 Press Ctrl + X, then Y, then Enter
 sudo reboot
