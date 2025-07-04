@@ -33,5 +33,5 @@ static domain_name_servers=8.8.8.8 1.1.1.1
 
 step-5
 ifconfig eth0
-
+Note- yaha se hume static ip mil jayega jo humne set kiya hai wo hi hai yaa nahi
  
