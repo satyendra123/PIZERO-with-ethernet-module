@@ -1,0 +1,5 @@
+1) sudo nano /boot/cmdline.txt
+2) sudo nano /home/pi/.bashrc
+3) sudo nano /etc/dhcpcd.conf
+4) sudo nano /boot/config.txt
+5) ifconfig
