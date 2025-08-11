@@ -167,3 +167,13 @@ while True:
         print(f"Unexpected error: {e}")
     print("Reconnecting in 2s...")
     time.sleep(2)
+
+
+2) how to run the python code automatically after power boots up
+
+a) #!/usr/bin/env python3  in the first line add this line in the code
+b) make the executable by running this command chmod +x /home/pi/code.py
+c) sudo nano /etc/rc.local isko run karne par ek file open hoga isme Exit0 ke upar ye line add kar do
+   (sleep 15; sudo python3 /home/pi/code.py &> /home/pi/startup.log) &
+    exit 0
+d) sudo reboot and test it from the hercules software whether it is connected or not
