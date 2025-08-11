@@ -1,0 +1,13 @@
+scanner  PI zero 2w
+RX    -  pin 8
+TX    -  pin 10
+gnd   -  pin 6
+VCC   -  pin 2
+
+relay    PI zero 2w
+vcc   -  pin 4
+gnd   -  pin 9
+in    -  pin 11 but according to the GPIO it is 17 so that is why in the code we have written relay=17
+
+ENC     PI ZERO 2w
+  
