@@ -1,0 +1,189 @@
+import socket
+import time
+import RPi.GPIO as GPIO
+import serial
+import threading
+import queue
+
+# =========================
+# Utility: Get IP address
+# =========================
+def get_ip_address():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0.1)
+        s.connect(('8.8.8.8', 80))
+        ip_address = s.getsockname()[0]
+        s.close()
+        return ip_address
+    except Exception:
+        return None
+
+# =========================
+# Utility: Remove duplicates
+# =========================
+def remove_duplicate_substring(input_value):
+    input_string = str(input_value)
+    length = len(input_string)
+    for i in range(1, length // 2 + 1):
+        substr = input_string[:i]
+        if substr * (length // i) == input_string:
+            return substr
+    return input_string
+
+# =========================
+# GPIO Setup
+# =========================
+ENTRY_RELAY_PIN = 17
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(ENTRY_RELAY_PIN, GPIO.OUT)
+GPIO.output(ENTRY_RELAY_PIN, GPIO.HIGH)
+
+# Serial QR scanner
+ENTRY = serial.Serial('/dev/ttyAMA0', baudrate=115200, timeout=1)
+prev_scanned_data_entry = {"Scanner 1": ""}
+
+# Queue for GPIO operations
+gpio_queue = queue.Queue()
+
+def perform_gpio_operations():
+    while True:
+        operation = gpio_queue.get()
+        if operation is None:
+            break
+        if operation == "OPENEN":
+            GPIO.output(ENTRY_RELAY_PIN, GPIO.LOW)
+            time.sleep(0.5)
+            GPIO.output(ENTRY_RELAY_PIN, GPIO.HIGH)
+
+threading.Thread(target=perform_gpio_operations, daemon=True).start()
+
+# =========================
+# QR Scanner Thread
+# =========================
+def read_qr_code(scanner, scanner_name, conn_callback):
+    global prev_scanned_data_entry
+    while True:
+        try:
+            data = scanner.readline().decode('utf-8').strip()
+            if data:
+                if data != prev_scanned_data_entry[scanner_name]:
+                    cleaned_data = data.replace("TG", "").replace("QR", "").replace("END", "")
+                    if cleaned_data.isnumeric():
+                        protocol = "|ENCD-" if scanner_name == "Scanner 1" else "|EXCD-"
+                    else:
+                        protocol = "|ENQR-" if scanner_name == "Scanner 1" else "|EXQR-"
+
+                    cleaned_data = protocol + remove_duplicate_substring(cleaned_data) + "%\n"
+                    print(f"Scanned by {scanner_name}: {cleaned_data}")
+
+                    conn = conn_callback()
+                    if conn:
+                        try:
+                            conn.send(cleaned_data.encode('utf-8'))
+                        except:
+                            pass
+
+                    prev_scanned_data_entry[scanner_name] = cleaned_data
+        except:
+            time.sleep(0.1)
+
+# =========================
+# Heartbeat Thread
+# =========================
+def send_heartbeat(conn_callback):
+    while True:
+        time.sleep(3)
+        try:
+            conn = conn_callback()
+            if conn:
+                conn.send('|HLT%\n'.encode('utf-8'))
+        except:
+            pass
+
+# =========================
+# Server Function
+# =========================
+def start_server():
+    HOST = get_ip_address()
+    PORT = 6000
+    if not HOST:
+        print("No IP found, retrying in 5s...")
+        time.sleep(5)
+        return
+
+    print(f"Starting server on {HOST}:{PORT}")
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+
+    try:
+        server_socket.bind((HOST, PORT))
+        server_socket.listen(1)
+        print("Waiting for connection...")
+        conn, addr = server_socket.accept()
+        print("Connected by", addr)
+    except OSError as e:
+        print(f"Socket bind/accept failed: {e}")
+        server_socket.close()
+        time.sleep(3)
+        return
+
+    current_conn = [conn]
+    def get_conn():
+        return current_conn[0]
+
+    threading.Thread(target=send_heartbeat, args=(get_conn,), daemon=True).start()
+    threading.Thread(target=read_qr_code, args=(ENTRY, "Scanner 1", get_conn), daemon=True).start()
+
+    try:
+        while True:
+            try:
+                data = conn.recv(1024).decode('utf-8')
+                if not data:
+                    print("Connection lost")
+                    break
+
+                response = ""
+                if data.startswith("|"):
+                    start_index = data.find("|") + 1
+                    end_index = data.find("%")
+                    if start_index != -1 and end_index != -1:
+                        extracted_data = data[start_index:end_index]
+                        if extracted_data == "OPENEN":
+                            gpio_queue.put("OPENEN")
+                            response = "|OK%"
+                        elif extracted_data.startswith("ENQR-"):
+                            qr_code = extracted_data[len("ENQR-"):].strip()
+                            response = "|OPENEN%" if qr_code.isalnum() else "|INVALIDEN%"
+                        elif extracted_data.startswith("ENCD-"):
+                            card_data = extracted_data[len("ENCD-"):].strip()
+                            response = "|OPENEN%" if card_data.isnumeric() else "|INVALIDEN%"
+
+                print(f"Received: {data}")
+                print(f"Sending: {response}")
+                conn.send(response.encode('utf-8'))
+
+            except Exception as e:
+                print(f"Data handling error: {e}")
+                break
+    finally:
+        try:
+            current_conn[0] = None
+            conn.close()
+            server_socket.close()
+            print("Sockets closed, ready to reconnect")
+        except:
+            pass
+
+# =========================
+# Auto-restart forever
+# =========================
+while True:
+    try:
+        start_server()
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+    print("Reconnecting in 2s...")
+    time.sleep(2)
