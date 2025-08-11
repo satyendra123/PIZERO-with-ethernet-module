@@ -5,9 +5,6 @@ import serial
 import threading
 import queue
 
-# =========================
-# Utility: Get IP address
-# =========================
 def get_ip_address():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -19,9 +16,6 @@ def get_ip_address():
     except Exception:
         return None
 
-# =========================
-# Utility: Remove duplicates
-# =========================
 def remove_duplicate_substring(input_value):
     input_string = str(input_value)
     length = len(input_string)
@@ -31,9 +25,6 @@ def remove_duplicate_substring(input_value):
             return substr
     return input_string
 
-# =========================
-# GPIO Setup
-# =========================
 ENTRY_RELAY_PIN = 17
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -59,9 +50,6 @@ def perform_gpio_operations():
 
 threading.Thread(target=perform_gpio_operations, daemon=True).start()
 
-# =========================
-# QR Scanner Thread
-# =========================
 def read_qr_code(scanner, scanner_name, conn_callback):
     global prev_scanned_data_entry
     while True:
@@ -89,9 +77,6 @@ def read_qr_code(scanner, scanner_name, conn_callback):
         except:
             time.sleep(0.1)
 
-# =========================
-# Heartbeat Thread
-# =========================
 def send_heartbeat(conn_callback):
     while True:
         time.sleep(3)
@@ -102,9 +87,6 @@ def send_heartbeat(conn_callback):
         except:
             pass
 
-# =========================
-# Server Function
-# =========================
 def start_server():
     HOST = get_ip_address()
     PORT = 6000
@@ -177,9 +159,6 @@ def start_server():
         except:
             pass
 
-# =========================
-# Auto-restart forever
-# =========================
 while True:
     try:
         start_server()
