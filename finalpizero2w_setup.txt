@@ -33,3 +33,12 @@ Categories=Development;IDE;Programming;
 
 step-8) itna hone ke bad mai ek file banaunga code.py aur usme code dal dunga.
 step-9) iske bad hum 
+
+step-10) how to run the python code automatically after power boots up
+
+a) #!/usr/bin/env python3  in the first line add this line in the code
+b) make the executable by running this command chmod +x /home/satyendra/code.py
+c) sudo nano /etc/rc.local isko run karne par ek file open hoga isme Exit0 ke upar ye line add kar do
+   (sleep 15; sudo python3 /home/satyendra/code.py &> /home/pi/startup.log) &
+    exit 0
+d) sudo reboot and test it from the hercules software whether it is connected or not
