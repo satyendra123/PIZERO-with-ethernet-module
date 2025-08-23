@@ -11,6 +11,23 @@ static ip_address=192.168.1.150/24
 static routers=192.168.1.1
 static domain_name_servers=8.8.8.8
 
-Note- itna karne ke bad ab hum jab sudo reboot kake aur wifi ko close karke ping karenge aur dekhenge ki ye ping hota hai yaa nahi
+Note- itna karne ke bad ab hum jab sudo reboot kake aur wifi ko close karke kewal lan module se lan connection connect karke ping karenge aur dekhenge ki ye ping hota hai yaa nahi so ye ping ho rha hai. 
+step-7) iske bad hum vnc se connect kar lenge. iske bad thonny ko download kar lenge
+sudo apt update
+sudo apt install thonny -y
+sudo apt install python3 -y
+sudo apt install python3-pip -y
+pip3 install RPi.GPIO
+sudo nano /usr/share/applications/thonny.desktop one file is open then paste this code
 
-step-7) 
+[Desktop Entry]
+Name=Thonny Python IDE
+Comment=Python IDE for beginners
+Exec=thonny
+Icon=thonny
+Terminal=false
+Type=Application
+Categories=Development;IDE;Programming;
+
+step-8) itna hone ke bad mai ek file banaunga code.py aur usme code dal dunga.
+step-9) iske bad hum 
