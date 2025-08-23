@@ -1,0 +1,5 @@
+step-1) sabse pahle pi-imager software se sd card me pi-32 legacy wala os dalenge, network setup karenge with name and password otherthan pi and raspberry. so i have used satyendra name and password- singh
+step-2) sara file ho jane ke bad isme ssh dalenge
+step-3) iske bad hum memory card ko pi me lgayenge, hdmi cable lgayenge, aur ek bluetooth lgayenge mouse ko connect karne ke liye something cable 2.o to otg inwhich bluetooth mouse connector will be connected
+step-4) putty ko open karenge aur usme hum raspberrypi.local ip or hostname dalkar open krenge with ssh and port 22. login krenge with name satyendra and password-singh. afer login in the cmd i will write sudo raspi-config
+step-5) iske bad me hum ssh ko enable krenge, vnc ko enable krenge, spi ko enable krenge, aur serial me hume do chiz milega jisme se pahle ye rhega Would you like a login shell to be accessible over serial? so isko  hum no krenge aur dusra humara ye rhega 2)  Would you like the serial port hardware to be enabled? so isko hum yes krenge
