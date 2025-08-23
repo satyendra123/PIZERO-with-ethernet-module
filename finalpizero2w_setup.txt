@@ -42,4 +42,42 @@ c) sudo nano /etc/rc.local isko run karne par ek file open hoga isme Exit0 ke up
     exit 0
 d) sudo reboot and test it from the hercules software whether it is connected or not
 
-step-11) isme hum ab ek kaam karna hai ki hume apne scanner ko connect karna hai RX and Tx so pi ke uart ko connect karna hai.aur humara scanner 115200 baudrate par connect karta hai to dekhte hai ki isko kaise karte hai
+step-11) isme hum ab ek kaam karna hai ki hume apne scanner ko connect karna hai RX and Tx so pi ke uart ko connect karna hai.aur humara scanner 115200 baudrate par connect karta hai to dekhte hai ki isko kaise karte hai. 
+a) sudo nano /boot/config.txt
+b) enable_uart=1
+   dtoverlay=disable-bt
+c) for stopping and disable the bluetooth service because both the uart and bluetooth sharing the same uart pin. because pi have only one uart so by default bluetooth using     this uart. so we need to disable this bluetooth to connect any other uart sensor and get the data from it
+   sudo systemctl disable hciuart
+   sudo systemctl stop hciuart
+
+d) sudo reboot
+e) connect the sensor in these pins
+Scanner TX → (RX, pin 10)
+Scanner RX → (TX, pin 8)
+GND → Pi GND (pin 6)
+(Optional) VCC → Pi 3.3V (pin 17)
+
+Note- agar hum check karna chahte hai ki humare pi zero 2w me kitne uart hote hai to hum ye wala command run krenge ls -l /dev/ttyS* . so hume ye output dekhne ko milega
+/dev/ttyS0
+/dev/ttyAMA0 - 
+means humare pass do uart hai. lekin hai ek hi pin 8 aur pin 10. dono basically ye wala hi use karte hai. bluetooth aur dusra kuch integration karne ke liye.
+
+1) By default, /dev/ttyS0 is mapped to GPIO14/15.
+If you want to be 100% sure, add this line in /boot/config.txt:
+enable_uart=1 so iske likhne se ye ttyS0 enable ho jayega. lekin ye mini uart hai. larger baudrate ko support nahi karta hai. kyuki isme bydefault bluetooth bhi isi se       internally connect rahta hai.
+
+2) /dev/ttyAMA0 - so iska fully use karne ke liye hum kya karenge ki apne bluetooth ko puri tarah se disable kar denge 
+dtoverlay=disable-bt
+enable_uart=1
+so ye fully work karega
+
+Note- for testing whether data is coming or not. means bina code likhe aur chalaye agar mai check karna chahta hu ki ye uart pin mujhe data de rha hai yaa nahi. to mai simply ek serial terminal emulator download kar lunga jaise ki minicom. ye same docklight jaisa software hota hai jo serial data ko dikhata hai
+
+a) sudo apt install minicom -y
+b) minicom -b 9600 -o -D /dev/ttyS0
+
+aur agr mai /dev/ttyAMA0 isme se dekhna chahta hu to ye wala code run krunga. minicom -b 9600 -o -D /dev/ttyAMA0
+
+Note- aisa karne se hume directly pta lag jayega ki sensor hume data de bhi raha hai yaa nahi. aur kaon sa uart connect hai aur enable hai bhi yaa nahi sara chiz. bina code ko run kiye
+
+
