@@ -32,8 +32,7 @@ Type=Application
 Categories=Development;IDE;Programming;
 
 step-8) itna hone ke bad mai ek file banaunga code.py aur usme code dal dunga.
-step-9) iske bad hum 
-
+step-9) iske bad hum dekhenge ki pi ke code ko auto run me kaise krte hai
 step-10) how to run the python code automatically after power boots up
 
 a) #!/usr/bin/env python3  in the first line add this line in the code
@@ -42,3 +41,5 @@ c) sudo nano /etc/rc.local isko run karne par ek file open hoga isme Exit0 ke up
    (sleep 15; sudo python3 /home/satyendra/code.py &> /home/pi/startup.log) &
     exit 0
 d) sudo reboot and test it from the hercules software whether it is connected or not
+
+step-11) isme hum ab ek kaam karna hai ki hume apne scanner ko connect karna hai RX and Tx so pi ke uart ko connect karna hai.aur humara scanner 115200 baudrate par connect karta hai to dekhte hai ki isko kaise karte hai
