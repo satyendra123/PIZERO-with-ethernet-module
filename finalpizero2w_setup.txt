@@ -13,3 +13,4 @@ static domain_name_servers=8.8.8.8
 
 Note- itna karne ke bad ab hum jab sudo reboot kake aur wifi ko close karke ping karenge aur dekhenge ki ye ping hota hai yaa nahi
 
+step-7) 
