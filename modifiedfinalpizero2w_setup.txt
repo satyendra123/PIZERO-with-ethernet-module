@@ -8,10 +8,12 @@ step-6) isme hum apne enc ko enable krenge kuch is tarike se taki hum bina wifi 
         dtoverlay=enc28j60
 step-7) abhi ye wifi se ping hota hai. jab hum ping raspberrypi.local likhte hai to ye ping hota hai kyuki hum same wifi se connect ho rhe hai. lekin ab mai apne project me enc ko lgana chahta hu aur static ip set karna chahta hu. so hume enc28j60 module ko enable karna hai. so isko enable karne ke liye hum 
 a) sudo nano /etc/dhcpcd.conf
-b) interface eth0
-static ip_address=192.168.1.150/24
+b) 
+interface eth0
+static ip_address=192.168.1.152/24
 static routers=192.168.1.1
 static domain_name_servers=8.8.8.8
+noipv6
 
 Note- itna karne ke bad ab hum jab sudo reboot kake aur wifi ko close karke kewal lan module se lan connection connect karke ping karenge aur dekhenge ki ye ping hota hai yaa nahi so ye ping ho rha hai. 
 step-7) iske bad hum vnc se connect kar lenge. iske bad thonny ko download kar lenge
