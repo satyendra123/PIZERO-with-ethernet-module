@@ -57,7 +57,7 @@ e) connect the sensor in these pins
 Scanner TX → (RX, pin 10)
 Scanner RX → (TX, pin 8)
 GND → Pi GND (pin 6)
-(Optional) VCC → Pi 3.3V (pin 17)
+(Optional) VCC → Pi 5v (pin 2)
 
 Note- agar hum check karna chahte hai ki humare pi zero 2w me kitne uart hote hai to hum ye wala command run krenge ls -l /dev/ttyS* . so hume ye output dekhne ko milega
 /dev/ttyS0
