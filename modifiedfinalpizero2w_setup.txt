@@ -83,3 +83,51 @@ aur agr mai /dev/ttyAMA0 isme se dekhna chahta hu to ye wala code run krunga. mi
 Note- aisa karne se hume directly pta lag jayega ki sensor hume data de bhi raha hai yaa nahi. aur kaon sa uart connect hai aur enable hai bhi yaa nahi sara chiz. bina code ko run kiye
 
 
+EX-2 agar to new os hai boolworm legacy 32 bit os
+
+for changing the static ip
+step-1 sudo nano /boot/firmware/config.txt   and add this below line below the spi=on
+       dtoverlay=enc28j60,spi0-0
+
+step-2 sudo reboot and after reboot for testing whether it is set or not we check by putting the below command
+step-2 for checking the ethernet is up or not. means enc28j60 configuration will be done or not
+       dmesg | grep enc28j60
+       lsmod | grep enc28j60
+       ip link
+
+step-2 sudo systemctl disable dhcpcd --now
+sudo systemctl disable NetworkManager --now
+
+
+step-3 sudo systemctl enable systemd-networkd --now
+sudo systemctl enable systemd-resolved --now
+
+step-4 sudo nano /etc/systemd/network/10-eth0.network
+
+step-5
+[Match]
+Name=eth0
+
+[Network]
+Address=192.168.1.200/24
+Gateway=192.168.1.1
+DNS=8.8.8.8
+
+
+
+step-5 sudo systemctl disable dhcpcd --now
+sudo systemctl disable NetworkManager --now
+
+step-6 sudo systemctl enable systemd-networkd --now
+sudo systemctl enable systemd-resolved --now
+
+step-7 sudo systemctl restart systemd-networkd
+
+step-8 networkctl status eth0
+ip addr show eth0
+
+
+
+
+
+
