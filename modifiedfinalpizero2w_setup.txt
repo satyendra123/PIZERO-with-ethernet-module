@@ -120,8 +120,8 @@ step-8 and check by writing this command to check the ip address
        networkctl status eth0
        ip addr show eth0
 
+Note-2 man lo agar mere pass ek pi hai aur uska mai sara OS and all copy karna chahta hu dusre pi me directly to mai simply ye wala command chalaunga
 
-
-
-
-
+note- by writing this command we can copy one to other all the files with all the settings and it is working same as previous
+sudo dd if=/dev/mmcblk0 of=/dev/sda bs=4M status=progress
+sync
