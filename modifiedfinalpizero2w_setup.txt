@@ -105,16 +105,16 @@ Address=192.168.2.155/24
 Gateway=192.168.2.1
 DNS=8.8.8.8
 
-step-5 disable the dhcpcd and networkManager 
-       sudo systemctl disable dhcpcd --now
-       sudo systemctl disable NetworkManager --now
-
-step-6 now enable the systemd-networkd and systemd-resolved
+step-5 now enable the systemd-networkd and systemd-resolved
        sudo systemctl enable systemd-networkd --now
        sudo systemctl enable systemd-resolved --now
 
-step-7 now restart the systemd-networkd
+step-6 now restart the systemd-networkd
        sudo systemctl restart systemd-networkd
+
+step-7 disable the dhcpcd and networkManager 
+       sudo systemctl disable dhcpcd --now
+       sudo systemctl disable NetworkManager --now
 
 step-8 and check by writing this command to check the ip address
        networkctl status eth0
