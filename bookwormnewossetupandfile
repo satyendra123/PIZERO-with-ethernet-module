@@ -1,0 +1,66 @@
+raspberry pi with touch screen run the tkinter gui directly
+
+1) sudo apt update
+sudo apt install thonny -y
+sudo apt install python3 -y
+sudo apt install python3-pip -y
+pip3 install RPi.GPIO
+
+2) in the vs code download the remote ssh and connect with the pi through this ssh housys@192.168.2.155 then run this nano code.py so this will create a file and paste the code
+3) run the code. when you run it then it will give the error because of uart setup. because in this bluetooth and uart share the same pin so we will disable the bluetooth
+4) dtoverlay=disable-bt
+   enable_uart=1
+
+5) sudo systemctl disable bluetooth.service
+sudo systemctl disable hciuart.service
+sudo systemctl stop bluetooth.service
+sudo systemctl stop hciuart.service
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+6) how to run the program in startup by making the system d
+
+1. Make sure your script starts like this:
+in the code.py write this line at the top of the code    #!/usr/bin/env python3
+2) And make it executable by writing this command in the cmd : chmod +x /home/housys/code.py
+3) run this command sudo nano /etc/systemd/system/mystartup.service so one file will be open and write the below details
+[Unit]
+Description=Run custom Python script at boot
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/housys/code.py
+WorkingDirectory=/home/housys
+StandardOutput=append:/home/housys/startup.log
+StandardError=append:/home/housys/startup.log
+Restart=on-failure
+User=housys
+
+[Install]
+WantedBy=multi-user.target
+
+4) sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl enable mystartup.service
+
+5) sudo reboot
+
+
+   
+
