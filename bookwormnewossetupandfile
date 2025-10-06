@@ -16,6 +16,23 @@ sudo systemctl disable hciuart.service
 sudo systemctl stop bluetooth.service
 sudo systemctl stop hciuart.service
 
+6) sudo nano /boot/firmware/config.txt
+dtparam=spi=on
+dtoverlay=enc28j60,spi0-0
+
+b)  write ip link  this command and check whether the eth0 exist or not
+c) sudo nano /etc/systemd/network/10-eth0.network open a editor then add this line
+[Match]
+Name=eth0
+
+[Network]
+Address=192.168.2.155/24
+Gateway=192.168.2.1
+DNS=8.8.8.8
+
+d) sudo systemctl restart systemd-networkd
+   now check by writing this command. it will display the eth ip : ip addr show eth0
+
 
 
 
