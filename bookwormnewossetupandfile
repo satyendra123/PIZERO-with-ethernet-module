@@ -33,23 +33,12 @@ DNS=8.8.8.8
 d) sudo systemctl restart systemd-networkd
    now check by writing this command. it will display the eth ip : ip addr show eth0
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+e) check whether the enc28j60 eth0 is connected or not
+housys@raspberrypi:~ $ dmesg | grep enc28
+[    3.051022] enc28j60 spi0.0: Ethernet driver 1.02 loaded
+[    3.053255] enc28j60 spi0.0: chip not found
+[    3.053296] enc28j60 spi0.0: probe with driver enc28j60 failed with error -5
+housys@raspberrypi:~ $ 
 
 6) how to run the program in startup by making the system d
 
