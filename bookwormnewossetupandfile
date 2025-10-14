@@ -29,11 +29,23 @@ Name=eth0
 Address=192.168.2.151/24
 Gateway=192.168.2.1
 DNS=8.8.8.8
+DHCP=no
 LinkLocalAddressing=no
 
 [Link]
 RequiredForOnline=no
 
+d)
+sudo systemctl disable dhcpcd
+sudo systemctl stop dhcpcd
+sudo systemctl restart systemd-networkd
+and check the ip by writing this command networkctl status eth0
+
+e)
+Enable and restart
+Enable and restart systemd-networkd
+sudo systemctl enable systemd-networkd
+sudo systemctl restart systemd-networkd
 
 d) sudo systemctl restart systemd-networkd
    now check by writing this command. it will display the eth ip : ip addr show eth0
