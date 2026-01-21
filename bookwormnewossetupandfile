@@ -85,5 +85,66 @@ sudo systemctl enable mystartup.service
 5) sudo reboot
 
 
-   
+second method- this is the easiest second method i have searched and it is working
+Step 1: Enable SPI and ENC28J60 overlay
+sudo nano /boot/firmware/config.txt
+add these lines in the file
+dtparam=spi=on
+dtoverlay=enc28j60
+
+Step 2: Verify ENC28J60 is detected
+dmesg | grep enc28j60
+
+Step 3: Set Static IP on ENC28J60 (eth0)
+sudo nmcli con modify "Wired connection 1" ipv4.method manual
+sudo nmcli con modify "Wired connection 1" ipv4.addresses 192.168.2.155/24
+sudo nmcli con modify "Wired connection 1" ipv4.gateway 192.168.2.1
+sudo nmcli con modify "Wired connection 1" ipv4.dns "8.8.8.8"
+
+step-4 for build the connection down and up
+sudo nmcli con down "Wired connection 1"
+sudo nmcli con up "Wired connection 1"
+
+Step 5: Verify the Static IP
+ip addr show eth0
+
+Step 6: (Recommended) Disable Wi-Fi Completely. go to this file
+sudo nano /boot/firmware/config.txt
+add this line in the file below the dt-overlay=enc28j60 
+dtoverlay=disable-wifi
+
+step-7:
+sudo reboot
+
+now we have also find the issue for copying the files from the local system to the pi
+✅ Method 1 (BEST): Upload file from Windows to Pi using SCP
+
+This avoids copy-paste completely.
+
+Step 1: Save your file locally
+
+On your Windows PC:
+
+Open Notepad / VS Code
+
+Paste your Python code
+
+Save as:
+
+code.py
+
+Step 2: Upload to Raspberry Pi
+
+Open Command Prompt / PowerShell on Windows:
+
+scp code.py housys@192.168.2.41:/home/housys/
+
+(Enter your Pi password when asked)
+
+Step 3: Verify on Pi
+ls -l ~/code.py
+nano ~/code.py
+
+
+
 
