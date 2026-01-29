@@ -199,4 +199,4 @@ while True:
     print("Reconnecting in 2s...\n")
     time.sleep(2)
 
-Note- previously i am gettig issue 
+Note- previously i am getting issue but this is working fine with the new QR scanner. now i will make sure this should run on the site also
