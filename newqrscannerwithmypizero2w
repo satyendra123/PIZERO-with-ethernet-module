@@ -1,0 +1,202 @@
+#!/usr/bin/env python3
+import socket
+import time
+import serial
+import threading
+import queue
+import RPi.GPIO as GPIO
+
+# ---------------- CONFIG ----------------
+
+PORT = 6000
+ENTRY_RELAY_PIN = 17
+SERIAL_PORT = '/dev/ttyAMA0'
+BAUDRATE = 115200
+
+# ---------------- GPIO ------------------
+
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(ENTRY_RELAY_PIN, GPIO.OUT)
+GPIO.output(ENTRY_RELAY_PIN, GPIO.HIGH)
+
+# ---------------- SERIAL ----------------
+
+ENTRY = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=0)
+
+# ---------------- GLOBALS ----------------
+
+current_conn = None
+conn_lock = threading.Lock()
+connection_alive = threading.Event()
+gpio_queue = queue.Queue()
+
+# ---------------- UTIL ------------------
+
+def get_ip_address():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except:
+        return None
+
+def safe_send(data):
+    with conn_lock:
+        if current_conn:
+            try:
+                current_conn.sendall(data.encode())
+            except:
+                pass
+
+# ---------------- GPIO THREAD ----------------
+
+def gpio_worker():
+    while True:
+        cmd = gpio_queue.get()
+        if cmd == "OPENEN":
+            GPIO.output(ENTRY_RELAY_PIN, GPIO.LOW)
+            time.sleep(0.5)
+            GPIO.output(ENTRY_RELAY_PIN, GPIO.HIGH)
+
+threading.Thread(target=gpio_worker, daemon=True).start()
+
+# ---------------- HEARTBEAT ----------------
+
+def heartbeat():
+    while connection_alive.is_set():
+        safe_send("|HLT%\n")
+        time.sleep(3)
+
+# ---------------- SERIAL READER (FRAMED) ----------------
+
+def serial_reader():
+    buffer = ""
+    last_rx = time.time()
+
+    while connection_alive.is_set():
+        try:
+            data = ENTRY.read(ENTRY.in_waiting or 1).decode('utf-8', errors='ignore')
+
+            if data:
+                buffer += data.strip()
+                last_rx = time.time()
+                print("RX:", repr(data))
+
+            # If no data for 80ms â†’ end of QR
+            if buffer and (time.time() - last_rx) > 0.08:
+                handle_qr_complete(buffer)
+                buffer = ""
+
+            time.sleep(0.005)
+
+        except Exception as e:
+            print("Serial error:", e)
+            time.sleep(0.1)
+
+
+def handle_qr_complete(qr):
+    qr = qr.strip()
+    # Remove junk if any
+    qr = qr.replace("TG", "").replace("QR", "").replace("END", "")
+
+    if not qr:
+        return
+
+    payload = f"|ENQR-{qr}%\n"
+
+    print("Scanned QR:", payload.strip())
+    safe_send(payload)
+
+
+# ---------------- TCP SERVER ----------------
+
+def start_server():
+    global current_conn
+
+    HOST = get_ip_address()
+    if not HOST:
+        print("No IP, retrying...")
+        time.sleep(2)
+        return
+
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind((HOST, PORT))
+    server.listen(1)
+
+    print(f"Server started on {HOST}:{PORT}")
+    print("Waiting for connection...")
+
+    conn, addr = server.accept()
+    print("Connected by", addr)
+
+    with conn_lock:
+        current_conn = conn
+
+    # VERY IMPORTANT
+    ENTRY.reset_input_buffer()
+    ENTRY.reset_output_buffer()
+
+    connection_alive.set()
+
+    threading.Thread(target=heartbeat, daemon=True).start()
+    threading.Thread(target=serial_reader, daemon=True).start()
+
+    try:
+        recv_buffer = ""
+        while True:
+            data = conn.recv(1024).decode('utf-8', errors='ignore')
+            if not data:
+                break
+
+            recv_buffer += data
+
+            while "%" in recv_buffer:
+                frame, recv_buffer = recv_buffer.split("%", 1)
+                frame += "%"
+                handle_tcp_frame(frame)
+
+    except Exception as e:
+        print("TCP error:", e)
+
+    finally:
+        print("Connection closed")
+        connection_alive.clear()
+        with conn_lock:
+            current_conn = None
+        conn.close()
+        server.close()
+
+# ---------------- TCP FRAME HANDLER ----------------
+
+def handle_tcp_frame(frame):
+    print("Received:", frame.strip())
+
+    if frame == "|OPENEN%":
+        gpio_queue.put("OPENEN")
+        safe_send("|OK%\n")
+        return
+
+    if frame.startswith("|ENQR-"):
+        qr = frame[6:-1]
+        safe_send("|OPENEN%\n" if qr.isalnum() else "|INVALIDEN%\n")
+
+    elif frame.startswith("|ENCD-"):
+        cd = frame[6:-1]
+        safe_send("|OPENEN%\n" if cd.isnumeric() else "|INVALIDEN%\n")
+
+# ---------------- MAIN LOOP ----------------
+
+while True:
+    try:
+        start_server()
+    except Exception as e:
+        print("Fatal error:", e)
+
+    print("Reconnecting in 2s...\n")
+    time.sleep(2)
+
+Note- previously i am gettig issue 
