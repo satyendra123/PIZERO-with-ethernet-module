@@ -1,0 +1,4 @@
+win32imager open karo aur jaha image ko store karna hai read karke uska location de do jaise D:\pi_backup.img something like this
+iske bad jo Read only Allocated partition ko uncheck rakhna hai. aur read button par click kar dena hai
+
+iske bad is wale memory card ko nikal kar jisme dalna hai wo wala memory card lgayenge aur apne image wali file ko select karenge aur write button par click kar denge
